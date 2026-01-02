@@ -162,12 +162,12 @@ class VectorDBPlugin(BasePlugin):
             # Search for similar messages
             search_limit = context.get('search_limit', 5)
             
-            search_results = self.client.search(
+            search_results = self.client.query_points(
                 collection_name=self.collection_name,
-                query_vector=query_embedding.tolist(),
+                query=query_embedding.tolist(),
                 limit=search_limit,
                 score_threshold=0.3  # Min similarity threshold
-            )
+            ).points
             
             # Format results
             results = []

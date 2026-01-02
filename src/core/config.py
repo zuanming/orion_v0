@@ -1,5 +1,6 @@
 """Configuration loader for Orion"""
 
+import os
 import yaml
 import logging
 from pathlib import Path
@@ -58,6 +59,12 @@ class Config:
         
         with open(self.path, 'r') as f:
             self.data = yaml.safe_load(f)
+        
+        # Override with environment variables if present
+        if os.getenv('OLLAMA_MODEL'):
+            if 'llm' not in self.data:
+                self.data['llm'] = {}
+            self.data['llm']['model'] = os.getenv('OLLAMA_MODEL')
         
         logger.info(f"Configuration loaded from {self.path}")
     

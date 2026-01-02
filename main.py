@@ -35,9 +35,10 @@ logger = logging.getLogger(__name__)
 async def initialize_orion():
     """Initialize Orion MVP with all components"""
     
+    # Load environment variables FIRST before config
     load_dotenv()
     
-    # Load config
+    # Load config (will read OLLAMA_MODEL from env)
     config = Config('config.yaml')
     logger.info(f"✓ Configuration loaded (v{config.get('app.version')})")
     

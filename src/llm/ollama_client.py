@@ -27,25 +27,33 @@ class OllamaClient:
     def __init__(self, config: Dict[str, Any] = None):
         """
         Initialize Ollama client
-        
+
         Args:
             config: Configuration dict with:
-                - model: Model name (e.g., 'gemma3:12b')
+                - model: Model name (from OLLAMA_MODEL env var or config)
                 - temperature: Response temperature (0.0-1.0)
                 - base_url: Ollama API URL
         """
         # Use config if provided, otherwise use environment variables
         if config is None:
             config = {}
-        
-        self.model = config.get('model') or os.getenv('LLM_MODEL', 'gemma3:12b')
+
+        # Model MUST come from config or env variable
+        self.model = config.get('model') or os.getenv('OLLAMA_MODEL')
+
+        if not self.model:
+            raise ValueError(
+                "No model specified. Set OLLAMA_MODEL environment variable "
+                "or provide 'model' in config. Example: OLLAMA_MODEL=gemma3n:e4b"
+            )
+
         self.temperature = config.get('temperature', 0.7)
-        self.base_url = config.get('base_url') or os.getenv('LLM_API_URL', 'http://127.0.0.1:11434')
-        
+        self.base_url = config.get('base_url') or os.getenv('OLLAMA_HOST', 'http://127.0.0.1:11434')
+
         # Set Ollama host from environment if provided
-        if 'LLM_API_URL' in os.environ:
+        if 'OLLAMA_HOST' in os.environ:
             ollama.host = self.base_url
-        
+
         logger.info(f"Initialized Ollama client")
         logger.info(f"  Model: {self.model}")
         logger.info(f"  API URL: {self.base_url}")
@@ -96,8 +104,8 @@ class OllamaClient:
         """
         sources = []
         
-        # Check for core identity
-        if 'CORE IDENTITY' in prompt or 'core-identity.md' in prompt:
+        # Check for core identity (note: context builder now uses 'USER IDENTITY')
+        if 'CORE IDENTITY' in prompt or 'USER IDENTITY' in prompt or 'core-identity.md' in prompt:
             sources.append(Source(type='core', name='preferences'))
         
         # Check for conversation buffer

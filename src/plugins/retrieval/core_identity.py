@@ -175,9 +175,19 @@ class CoreIdentityPlugin(BasePlugin):
         if not self.core_identity:
             return "No user identity information available."
         
+        # For the main markdown file, return the full structured content
+        # This preserves sections, subsections, and lists
+        identity_file = Path(self.identity_file)
+        if identity_file.exists():
+            try:
+                content = identity_file.read_text(encoding='utf-8')
+                return content.strip()
+            except Exception:
+                pass
+        
+        # Fallback to simple format
         lines = []
         for key, value in self.core_identity.items():
-            # Format key nicely
             key_title = key.replace('_', ' ').title()
             lines.append(f"**{key_title}**: {value}")
         

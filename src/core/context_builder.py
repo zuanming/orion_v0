@@ -44,10 +44,24 @@ class ContextBuilder:
         prompt_parts.append("Current time: " + datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         prompt_parts.append("")
         
+        # CRITICAL: Instructions about user identity
+        prompt_parts.append("=== CRITICAL INSTRUCTIONS ===")
+        prompt_parts.append("You have access to detailed information about the USER in the 'USER IDENTITY' section below.")
+        prompt_parts.append("When user asks 'Who am I?', 'tell me about myself', or similar, use that information to describe the USER.")
+        prompt_parts.append("The identity information contains the user's background, preferences, values, and work style.")
+        prompt_parts.append("=== END CRITICAL INSTRUCTIONS ===")
+        prompt_parts.append("")
+        
         # Add core identity if available
         if 'core_identity' in context and context['core_identity']:
-            prompt_parts.append("## CORE IDENTITY")
+            prompt_parts.append("## USER IDENTITY & PREFERENCES")
+            prompt_parts.append("The following information is about the USER (the person you are assisting), NOT about you (Orion).")
+            prompt_parts.append("")
             prompt_parts.append(context['core_identity'])
+            prompt_parts.append("")
+            prompt_parts.append("IMPORTANT: When user asks 'Who am I?', 'Who am I', or similar questions, use the information above to describe the USER.")
+            prompt_parts.append("")
+            prompt_parts.append("IMPORTANT: Use this information to understand who the user is, their preferences, work style, and how they prefer to interact.")
             prompt_parts.append("")
         
         # Add recent conversation if available
