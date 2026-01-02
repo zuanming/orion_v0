@@ -1,0 +1,16 @@
+# Core
+python-dotenv==1.0.0
+pyyaml==6.0.1
+
+# LLM (Local)
+ollama==0.1.7
+
+# Vector DB
+qdrant-client==1.7.0
+sentence-transformers==2.2.2
+
+# Telegram
+python-telegram-bot==20.7
+
+# Utilities
+aiofiles==23.2.1

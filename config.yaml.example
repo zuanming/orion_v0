@@ -1,0 +1,45 @@
+app:
+  name: "Orion"
+  version: "0.1.0-mvp"
+  debug: true
+
+llm:
+  provider: "ollama"
+  model: "gemma3:12b"  # or llama3.2, mistral, etc.
+  temperature: 0.7
+
+storage:
+  vector_db:
+    provider: "qdrant"
+    path: "data/vector_db"
+    collection: "conversations"
+  
+  buffer:
+    size: 20
+    path: "data/buffer"
+  
+  vault:
+    path: "vault"  # Change this to your vault path (e.g., /path/to/obsidian/vault)
+    core_identity_file: "_SYSTEM/core-identity.md"
+
+context:
+  max_tokens: 4000
+  search_results: 5
+
+plugins:
+  enabled:
+    - vector_db
+    - conversation_buffer
+    - core_identity
+    - vector_search
+    - vault_reader
+
+enhancements:
+  uncertainty:
+    enabled: true
+  conflict_detection:
+    enabled: true
+  source_citations:
+    enabled: true
+  error_acknowledgment:
+    enabled: true
