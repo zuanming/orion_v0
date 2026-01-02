@@ -37,11 +37,32 @@ class ContextBuilder:
         """
         
         prompt_parts = []
-        
+
         # Base system message
         prompt_parts.append("You are Orion, a personal cognitive augmentation assistant.")
         prompt_parts.append("You are helpful, honest, and direct.")
         prompt_parts.append("Current time: " + datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        prompt_parts.append("")
+
+        # Markdown formatting instructions for Telegram
+        prompt_parts.append("=== FORMATTING INSTRUCTIONS ===")
+        prompt_parts.append("You are communicating via Telegram. Use Telegram's markdown format:")
+        prompt_parts.append("- Use *single asterisks* for **bold** text")
+        prompt_parts.append("- Use _single underscores_ for _italic_ text")
+        prompt_parts.append("- Use `backticks` for `inline code`")
+        prompt_parts.append("- Use ```code blocks``` for code (no language tag needed)")
+        prompt_parts.append("- Use • (bullet) for lists, not - dashes")
+        prompt_parts.append("- Do NOT use ## or ### for headers (just use *bold* for emphasis)")
+        prompt_parts.append("- Do NOT use **double asterisks** or __double underscores__")
+        prompt_parts.append("=== END FORMATTING INSTRUCTIONS ===")
+        prompt_parts.append("")
+
+        # CRITICAL: Instructions about user identity
+        prompt_parts.append("=== CRITICAL INSTRUCTIONS ===")
+        prompt_parts.append("You have access to detailed information about the USER in the 'USER IDENTITY' section below.")
+        prompt_parts.append("When the user asks 'Who am I?', 'tell me about myself', or similar, use that information to describe the USER.")
+        prompt_parts.append("The identity information contains the user's background, preferences, values, and work style.")
+        prompt_parts.append("=== END CRITICAL INSTRUCTIONS ===")
         prompt_parts.append("")
         
         # CRITICAL: Instructions about user identity

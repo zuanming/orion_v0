@@ -27,39 +27,55 @@ class TelegramFormatter:
     def format_response(response: str, include_sources: bool = True) -> str:
         """
         Format response for Telegram
-        
+
+        LLM is instructed to use Telegram format, but we also convert
+        common markdown patterns as fallback for model variations.
+
         Args:
             response: Raw response text (may include sources)
             include_sources: Whether to format sources section
-        
+
         Returns:
             Telegram-formatted response
         """
-        
+
         # Split response and sources if present
         if include_sources and "📚 Sources:" in response:
             parts = response.split("📚 Sources:")
             main_response = parts[0].strip()
             sources = "📚 Sources:" + parts[1]
-            
+
             # Format main response and sources separately
             formatted_main = TelegramFormatter._format_main_response(main_response)
             formatted_sources = TelegramFormatter._format_sources(sources)
-            
+
             return f"{formatted_main}\n\n{formatted_sources}"
         else:
             return TelegramFormatter._format_main_response(response)
-    
+
     @staticmethod
     def _format_main_response(text: str) -> str:
-        """Format the main response text"""
-        
+        """
+        Format main response text for Telegram.
+
+        Converts common markdown patterns to Telegram format:
+        - **bold** → *bold*
+        - _italic_ (already correct, kept)
+        - ## Headers → *bold* emphasis
+        - - bullets → • bullets
+        """
+
         text = text.strip()
-        
-        # FIRST: Convert markdown **bold** to Telegram *bold*
-        # This handles ResponseEnhancer output
+
+        # Convert **bold** to *bold* (common markdown)
         text = re.sub(r'\*\*(.+?)\*\*', r'*\1*', text)
-        
+
+        # Convert ## Headers to *bold* (Telegram has no headers)
+        text = re.sub(r'^## (.+)$', r'*\1*', text, flags=re.MULTILINE)
+
+        # Convert - bullets to • (Telegram prefers emoji bullets)
+        text = re.sub(r'^- ', r'• ', text, flags=re.MULTILINE)
+
         # Format uncertainty markers with italics
         text = re.sub(
             r'\(not certain - please confirm\)',
@@ -76,40 +92,23 @@ class TelegramFormatter:
             r'_based on what we discussed_',
             text
         )
-        
-        # Format section headers with bold
-        text = re.sub(
-            r'^## (.+)$',
-            r'*\1*',
-            text,
-            flags=re.MULTILINE
-        )
-        
-        # Format bullet lists with • emoji (preserve or add)
-        text = re.sub(
-            r'^- ',
-            r'• ',
-            text,
-            flags=re.MULTILINE
-        )
-        
+
         return text
     
     @staticmethod
     def _format_sources(sources_text: str) -> str:
         """Format sources section"""
-        
+
         lines = sources_text.split('\n')
         formatted_lines = []
-        
+
         for line in lines:
             if line.strip().startswith('📚'):
-                # Bold the header
-                formatted_lines.append(f"*{line.strip()}*")
+                # Keep emoji header as-is (no markdown needed)
+                formatted_lines.append(line.strip())
             elif line.strip().startswith('•'):
                 # Keep bullet format but make file paths code
                 source = line.strip()
-                # Format vault/file paths as code
                 source = re.sub(
                     r'vault/([^ ]+)',
                     r'`vault/\1`',
@@ -121,7 +120,7 @@ class TelegramFormatter:
                 formatted_lines.append(f"_{line.strip()}_")
             elif line.strip():
                 formatted_lines.append(line)
-        
+
         return '\n'.join(formatted_lines)
     
     @staticmethod
@@ -262,26 +261,16 @@ class TelegramFormatter:
     @staticmethod
     def _validate_markdown(text: str) -> str:
         """
-        Validate and fix Telegram markdown entities
-        Remove problematic markdown to send as plain text instead
+        Validate Telegram markdown entities
+        Only clean up unmatched formatting characters
         """
-        # Instead of trying to fix broken markdown, strip it entirely
-        # This is safer and avoids entity parsing errors
+        # Note: _format_main_response() already converts to Telegram-compatible markdown
+        # We only need to clean up any unmatched/unbalanced characters
         
-        # Remove **bold**
-        text = re.sub(r'\*\*(.+?)\*\*', r'\1', text)
-        
-        # Remove __underline__
-        text = re.sub(r'__(.+?)__', r'\1', text)
-        
-        # Remove ~strikethrough~
-        text = re.sub(r'~(.+?)~', r'\1', text)
-        
-        # Note: Keep simple *bold* and _italic_ for Telegram
-        # They're more stable, but clean up if unmatched
-        
-        # Clean up any trailing/leading markdown characters
         text = text.strip()
+        
+        # Clean up unmatched formatting at start/end
+        # But preserve properly matched *bold*, _italic_, and `code`
         text = re.sub(r'[\*_`~]+\s*$', '', text)
         text = re.sub(r'^\s*[\*_`~]+', '', text)
         
